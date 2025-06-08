@@ -44,4 +44,4 @@ jobs:
           tags: twotanwin/loganalyzer-demo-app-fe:latest
 
       - name: ✅ Done
-        run: echo "✅ Docker image pushed to Docker Hub!"
+        run: echo "✅ Docker image pushed to Docker Hub"
