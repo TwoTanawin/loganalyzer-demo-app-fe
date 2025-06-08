@@ -41,7 +41,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: twotanwin/loganalyzer-demo-app-fe:latest
+          tags: twotanwin/loganalyzer-demo-app-fe:0.1
 
       - name: ✅ Done
         run: echo "✅ Docker image pushed to Docker Hub"
