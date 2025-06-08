@@ -14,24 +14,26 @@ jobs:
 
     steps:
       - name: ⬇️ Checkout source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🐣 Set up Bun
         uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
 
-      - name: 📦 Install dependencies
-        run: bun install --frozen-lockfile
+      - name: 📦 Install dependencies and generate lockfile
+        run: |
+          bun install
+          # This ensures bun.lockb is created if it doesn't exist
 
       - name: 🛠️ Build Next.js app
         run: bun run build
 
       - name: 🐳 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: 🔐 Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -47,6 +49,8 @@ jobs:
           context: .
           push: true
           tags: 914181716691.dkr.ecr.ap-southeast-1.amazonaws.com/loganalyzer-demo-app-fe:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: ✅ Done
         run: echo "✅ Docker image pushed to ECR!"
