@@ -1,5 +1,5 @@
 # Build stage using Node.js (better Next.js compatibility)
-FROM node:20-alpine AS base
+FROM node:20-bullseye-slim AS base
 
 WORKDIR /app
 
