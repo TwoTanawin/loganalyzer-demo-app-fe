@@ -58,7 +58,7 @@ interface Item {
   price?: number;
 }
 
-const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}${process.env.NEXT_PUBLIC_API_ENDPOINT || '/items'}`;
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://54.151.194.55:8080'}${process.env.NEXT_PUBLIC_API_ENDPOINT || '/items'}`;
 
 export default function ItemsManagementApp() {
   const logger = LoggerFactory.getLogger('ItemsManagementApp');
