@@ -1,34 +1,44 @@
-# Build stage using Node.js (better Next.js compatibility)
-FROM node:20-bullseye-slim AS base
+# Dockerfile
 
+# 1. Builder Stage: Build the Next.js app
+FROM node:20-bullseye-slim AS base
 WORKDIR /app
 
-# Copy dependency files
+# Install all dependencies (including devDependencies) needed for the build
 COPY package.json package-lock.json* ./
+RUN npm ci
 
-# Install dependencies with npm
-RUN npm ci --only=production
-
-# Copy source code
+# Copy the rest of the source code
 COPY . .
+
+# Set the output mode in next.config.js instead of here
+# ENV NEXT_TELEMETRY_DISABLED=1
+# ENV NEXT_OUTPUT_MODE=standalone
 
 # Build the Next.js app
 RUN npm run build
 
-# Production stage using Bun for runtime
-FROM oven/bun:1.1.13-slim
-
+# 2. Runner Stage: Create the final, small production image
+FROM node:20-bullseye-slim AS runner
 WORKDIR /app
 
-# Copy built application from build stage
-COPY --from=base /app/.next/standalone ./
-COPY --from=base /app/.next/static ./.next/static
+# Don't run production as root
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+USER nextjs
+
+# Copy the public folder
 COPY --from=base /app/public ./public
-COPY --from=base /app/package.json ./package.json
 
-# Expose port
+# Copy the standalone output
+COPY --from=base --chown=nextjs:nodejs /app/.next/standalone ./
+
+# Copy the static assets
+COPY --from=base --chown=nextjs:nodejs /app/.next/static ./.next/static
+
 EXPOSE 3000
-
-# Run the app in production mode
+ENV PORT 3000
 ENV NODE_ENV=production
+
+# Run the app
 CMD ["node", "server.js"]
