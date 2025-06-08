@@ -1,34 +1,32 @@
-# 1. Use Bun official base image
-FROM oven/bun:1.1.13 AS base
+# Build stage using Node.js (better Next.js compatibility)
+FROM node:20-alpine AS base
 
-# Set working directory
 WORKDIR /app
 
-# Copy dependency files (make bun.lockb optional)
-COPY package.json tsconfig.json ./
-COPY bun.lockb* ./
+# Copy dependency files
+COPY package.json package-lock.json* ./
 
-# Install dependencies
-RUN bun install --frozen-lockfile
+# Install dependencies with npm
+RUN npm ci --only=production
 
 # Copy source code
 COPY . .
 
 # Build the Next.js app
-RUN bun run build
+RUN npm run build
 
-# 2. Use minimal runtime for production
+# Production stage using Bun for runtime
 FROM oven/bun:1.1.13-slim
 
 WORKDIR /app
 
-# Copy only the necessary files from build stage
+# Copy built application from build stage
 COPY --from=base /app/.next/standalone ./
 COPY --from=base /app/.next/static ./.next/static
 COPY --from=base /app/public ./public
 COPY --from=base /app/package.json ./package.json
 
-# Expose port (default for Next.js apps)
+# Expose port
 EXPOSE 3000
 
 # Run the app in production mode
