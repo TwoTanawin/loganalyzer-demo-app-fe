@@ -6,42 +6,43 @@ import { Trash2, Edit, Plus, Save, X, Loader2 } from 'lucide-react';
 // Logger implementation similar to SLF4J
 class Logger {
   private className: string;
-  
+
   constructor(className: string) {
     this.className = className;
   }
 
-  private formatMessage(level: string, message: string, ...args: any[]): string {
+  private formatMessage(level: string, message: string, ...args: unknown[]): string {
     const timestamp = new Date().toISOString();
     const formattedArgs = args.length > 0 ? ` | Args: ${JSON.stringify(args)}` : '';
     return `[${timestamp}] ${level} ${this.className} - ${message}${formattedArgs}`;
   }
 
-  info(message: string, ...args: any[]): void {
+  info(message: string, ...args: unknown[]): void {
     console.log(this.formatMessage('INFO', message, ...args));
   }
 
-  debug(message: string, ...args: any[]): void {
+  debug(message: string, ...args: unknown[]): void {
     if (process.env.NODE_ENV === 'development') {
       console.debug(this.formatMessage('DEBUG', message, ...args));
     }
   }
 
-  warn(message: string, ...args: any[]): void {
+  warn(message: string, ...args: unknown[]): void {
     console.warn(this.formatMessage('WARN', message, ...args));
   }
 
-  error(message: string, error?: Error, ...args: any[]): void {
+  error(message: string, error?: Error, ...args: unknown[]): void {
     const errorInfo = error ? ` | Error: ${error.message} | Stack: ${error.stack}` : '';
     console.error(this.formatMessage('ERROR', message, ...args) + errorInfo);
   }
 
-  trace(message: string, ...args: any[]): void {
+  trace(message: string, ...args: unknown[]): void {
     if (process.env.NODE_ENV === 'development') {
       console.trace(this.formatMessage('TRACE', message, ...args));
     }
   }
 }
+
 
 // LoggerFactory similar to SLF4J
 class LoggerFactory {
