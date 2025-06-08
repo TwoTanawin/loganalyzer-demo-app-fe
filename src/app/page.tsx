@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Trash2, Edit, Plus, Save, X, Loader2 } from 'lucide-react';
 
 // Logger implementation similar to SLF4J
@@ -43,7 +43,6 @@ class Logger {
   }
 }
 
-
 // LoggerFactory similar to SLF4J
 class LoggerFactory {
   static getLogger(className: string): Logger {
@@ -75,8 +74,8 @@ export default function ItemsManagementApp() {
     price: 0
   });
 
-  // Fetch all items
-  const fetchItems = async () => {
+  // Fetch all items - wrapped in useCallback to fix ESLint warning
+  const fetchItems = useCallback(async () => {
     logger.info('Starting to fetch all items');
     logger.debug('API URL configured', { url: API_BASE_URL });
     
@@ -119,7 +118,7 @@ export default function ItemsManagementApp() {
       setLoading(false);
       logger.debug('Fetch operation completed');
     }
-  };
+  }, [logger]);
 
   // Create new item
   const createItem = async (item: Item) => {
@@ -290,7 +289,7 @@ export default function ItemsManagementApp() {
   useEffect(() => {
     logger.info('ItemsManagementApp component initialized');
     fetchItems();
-  }, [logger]);
+  }, [fetchItems, logger]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -439,15 +438,15 @@ export default function ItemsManagementApp() {
               {items.map((item) => (
                 <div key={item.id} className="p-6">
                   {editingItem?.id === item.id ? (
-                    // Edit Form
+                    // Edit Form - Fixed null check
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                           <input
                             type="text"
-                            value={editingItem.name}
-                            onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
+                            value={editingItem?.name || ''}
+                            onChange={(e) => editingItem && setEditingItem({ ...editingItem, name: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           />
                         </div>
@@ -455,8 +454,8 @@ export default function ItemsManagementApp() {
                           <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                           <input
                             type="text"
-                            value={editingItem.category || ''}
-                            onChange={(e) => setEditingItem({ ...editingItem, category: e.target.value })}
+                            value={editingItem?.category || ''}
+                            onChange={(e) => editingItem && setEditingItem({ ...editingItem, category: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           />
                         </div>
@@ -465,16 +464,16 @@ export default function ItemsManagementApp() {
                           <input
                             type="number"
                             step="0.01"
-                            value={editingItem.price || 0}
-                            onChange={(e) => setEditingItem({ ...editingItem, price: parseFloat(e.target.value) || 0 })}
+                            value={editingItem?.price || 0}
+                            onChange={(e) => editingItem && setEditingItem({ ...editingItem, price: parseFloat(e.target.value) || 0 })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           />
                         </div>
                         <div className="md:col-span-2">
                           <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                           <textarea
-                            value={editingItem.description}
-                            onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
+                            value={editingItem?.description || ''}
+                            onChange={(e) => editingItem && setEditingItem({ ...editingItem, description: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             rows={2}
                           />
@@ -482,7 +481,7 @@ export default function ItemsManagementApp() {
                       </div>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => updateItem(editingItem)}
+                          onClick={() => editingItem && updateItem(editingItem)}
                           disabled={loading}
                           className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm transition-colors"
                         >
