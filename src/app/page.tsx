@@ -95,10 +95,10 @@ export default function ItemsManagementApp() {
       });
       
       if (!response.ok) {
-        logger.error('HTTP request failed with non-OK status', { status: response.status });
+        logger.error('HTTP request failed with non-OK status', undefined, { status: response.status });
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       logger.debug('Response data received', { 
         dataType: typeof data, 
@@ -289,14 +289,8 @@ export default function ItemsManagementApp() {
 
   useEffect(() => {
     logger.info('ItemsManagementApp component initialized');
-    logger.debug('Application configuration', { 
-      apiBaseUrl: API_BASE_URL,
-      environment: process.env.NODE_ENV,
-      logLevel: process.env.NEXT_PUBLIC_LOG_LEVEL || 'info'
-    });
-    
     fetchItems();
-  }, []);
+  }, [logger]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
